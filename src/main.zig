@@ -4,7 +4,9 @@ const gui = @import("gui");
 
 const Window = gui.window.Window;
 
-fn createDefaultAllocator() std.mem.Allocator {
+var window: *gui.window.windowImplementation() = undefined;
+
+fn getDefaultAllocator() std.mem.Allocator {
     if (builtin.cpu.arch == .wasm32) {
         return std.heap.wasm_allocator;
     }
@@ -15,31 +17,34 @@ fn createDefaultAllocator() std.mem.Allocator {
     return std.heap.c_allocator;
 }
 
-pub fn main() void {
-    const allocator = createDefaultAllocator();
-
-    // Cross-platform logging w/ format example:
-    const name = "Michael";
-    gui.print(allocator, "hello, {s}\n", .{name});
-
-    // Draw some stuff to the screen:
-    const window = Window.create(allocator, .{
+/// Initializes the program, opens & configures the initial window and opengl context, etc.
+fn init() i32 {
+    const allocator = getDefaultAllocator();
+    window = Window.create(allocator, .{
         .height = 600,
         .width = 800,
         .title = "Demo",
         .vsync = true,
     }) orelse {
-        gui.print(allocator, "ERROR: could not create window\n", .{});
-        return;
+        gui.print("ERROR: could not create window\n", .{});
+        return -1;
     };
 
-    while (!window.shouldClose()) {
-        gui.gl.clearColor(.{ .r = 1.0, .g = 0.0, .b = 0.0, .a = 1.0 });
-        gui.gl.clearColorBuffer();
-        window.swap();
+    return 0;
+}
 
-        gui.window.pollEvents();
+export fn render() void {
+    gui.gl.clearColor(.{ .r = 1.0, .g = 0.0, .b = 0.0, .a = 1.0 });
+    gui.gl.clearColorBuffer();
+    window.swap();
+}
+
+pub fn main() void {
+    if (init() != 0) {
+        gui.print("ERROR: could not init app\n", .{});
+        return;
     }
 
-    gui.print(allocator, "exiting application\n", .{});
+    gui.renderLoop(window, render);
+    gui.print("exiting application\n", .{});
 }

@@ -8,7 +8,8 @@ WebAssembly.instantiateStreaming(fetch("zig-out/bin/gui.wasm"), {
     console.debug("successfully loaded and compiled module.wasm", result.instance);
     // initialize the web assembly instance
     initializeWithInstance(result.instance);
-    // kick off the application
+
+    // initialize the application:
     result.instance.exports._start();
   })
   .catch((e) => {

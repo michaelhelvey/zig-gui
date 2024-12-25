@@ -140,11 +140,7 @@ pub const WasmWindow = struct {
 };
 
 pub fn pollEvents() void {
-    // FIXME: we need to integrate with requestAnimationFrame on web, which is going to require
-    // registring a callback function for rendering the application.  We can for sure do this,
-    // but it's going to involve some restructuring and memory coordination between the two sides.
     if (is_wasm) {
-        bindings.pollEvents();
         return;
     }
     c.glfwPollEvents();
