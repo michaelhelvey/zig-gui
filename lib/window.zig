@@ -119,18 +119,12 @@ pub const WasmWindow = struct {
 
     pub fn create(allocator: Allocator, options: Window.WindowCreateOptions) ?*Self {
         const self = allocator.create(Self) catch return null;
-        self.call_count = 0;
-
         bindings.setCanvasSize(options.width, options.height);
         return self;
     }
 
     pub fn shouldClose(self: *Self) bool {
-        // FIXME: this just disables the loop on web. We can fix this when we fix pollEvents below.
-        if (self.call_count > 1) {
-            return true;
-        }
-        self.call_count += 1;
+        _ = self;
         return false;
     }
 
